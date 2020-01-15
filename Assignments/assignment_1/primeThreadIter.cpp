@@ -6,9 +6,13 @@
 // Next index will be an increment of 16 (because 8{threads} * 2{to skip evens})
 // Prime 2 is easily known, so I count it towards count and sum manually.
 
+// Solution is suboptimal and essentially runs in O(n*sqrt(n))
+
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <queue>
+#include <string>
 
 using namespace std;
 using namespace std::chrono;
@@ -24,7 +28,7 @@ bool isPrime(int n)
     return true;
 }
 
-void checkForPrimesByMod(int startVal, int maxVal, int &acm, long long int &sum)
+void checkForPrimesByMod(int startVal, int maxVal, int &acm, long long int &sum, queue<int> &q)
 {
     acm = 0;
     sum = 0;
@@ -34,6 +38,9 @@ void checkForPrimesByMod(int startVal, int maxVal, int &acm, long long int &sum)
         {
             acm++;
             sum += i;
+            q.push(i);
+            if (q.size() > 10)
+                q.pop();
         }
     }
 }
@@ -44,8 +51,14 @@ void main(void)
 
     int prime_count;
     long long int prime_sum = 0;
-
     int MAX_VALUE = 100000000;
+    vector<queue<int>> v;
+    vector<int> vInt;
+
+    for (int i =  0; i < 8; i++)
+    {
+        v.push_back(queue<int>());
+    }
 
     cout << "Count prime numbers between 1 and 10**8" << endl << endl;
 
@@ -58,14 +71,14 @@ void main(void)
     int acm7 = 0; long long sum7 = 0;
     int acm8 = 0; long long sum8 = 0;
 
-    std::thread t1(checkForPrimesByMod, 3, MAX_VALUE, std::ref(acm1), std::ref(sum1));
-    std::thread t2(checkForPrimesByMod, 5, MAX_VALUE, std::ref(acm2), std::ref(sum2));
-    std::thread t3(checkForPrimesByMod, 7, MAX_VALUE, std::ref(acm3), std::ref(sum3));
-    std::thread t4(checkForPrimesByMod, 9, MAX_VALUE, std::ref(acm4), std::ref(sum4));
-    std::thread t5(checkForPrimesByMod, 11, MAX_VALUE, std::ref(acm5), std::ref(sum5));
-    std::thread t6(checkForPrimesByMod, 13, MAX_VALUE, std::ref(acm6), std::ref(sum6));
-    std::thread t7(checkForPrimesByMod, 15, MAX_VALUE, std::ref(acm7), std::ref(sum7));
-    std::thread t8(checkForPrimesByMod, 17, MAX_VALUE, std::ref(acm8), std::ref(sum8));
+    thread t1(checkForPrimesByMod, 3, MAX_VALUE, ref(acm1), ref(sum1), ref(v[0]));
+    thread t2(checkForPrimesByMod, 5, MAX_VALUE, ref(acm2), ref(sum2), ref(v[1]));
+    thread t3(checkForPrimesByMod, 7, MAX_VALUE, ref(acm3), ref(sum3), ref(v[2]));
+    thread t4(checkForPrimesByMod, 9, MAX_VALUE, ref(acm4), ref(sum4), ref(v[3]));
+    thread t5(checkForPrimesByMod, 11, MAX_VALUE, ref(acm5), ref(sum5), ref(v[4]));
+    thread t6(checkForPrimesByMod, 13, MAX_VALUE, ref(acm6), ref(sum6), ref(v[5]));
+    thread t7(checkForPrimesByMod, 15, MAX_VALUE, ref(acm7), ref(sum7), ref(v[6]));
+    thread t8(checkForPrimesByMod, 17, MAX_VALUE, ref(acm8), ref(sum8), ref(v[7]));
 
     t1.join();
     t2.join();
@@ -76,8 +89,20 @@ void main(void)
     t7.join();
     t8.join();
 
+    // Find count of primes, their sum and get the last 10
     prime_count = acm1 + acm2 + acm3 + acm4 + acm5 + acm6 + acm7 + acm8 + 1;
     prime_sum   = sum1 + sum2 + sum3 + sum4 + sum5 + sum6 + sum7 + sum8 + 2;
+
+    for (int i = 0; i < 8; i++)
+    {
+        while(!v[i].empty())
+        {
+            vInt.push_back(v[i].front());
+            v[i].pop();
+        }
+    }
+
+    sort(vInt.begin(), vInt.end());
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
@@ -85,5 +110,7 @@ void main(void)
     cout << "Time taken " << (double) duration.count() / 1000000 << " seconds" << endl;
     cout << prime_count << " primes" << endl;
     cout << prime_sum << " sum" << endl;
-    // Top ten maximum primes from bottom to top
+    for (int i = 70; i < 80; i++)
+       cout << vInt[i] << " ";
+    cout << endl;
 }
