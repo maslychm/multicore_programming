@@ -6,7 +6,7 @@
 // Next index will be an increment of 16 (because 8{threads} * 2{to skip evens})
 // Prime 2 is easily known, so I count it towards count and sum manually.
 
-// Solution is suboptimal and essentially runs in O(n*sqrt(n))
+// Solution is suboptimal and essentially runs in O(n*sqrt(n)) or maybe slower
 
 #include <iostream>
 #include <chrono>
