@@ -6,23 +6,13 @@
 using namespace std;
 using namespace std::chrono;
 
-#define NUM_VALUE 10000000
+#define NUM_VALUE 100000000
 
-// Even though none of the entries in vector overlap, when ram call
-// brings a chunk of memory to cache, previously working cores have a
-// changed state that gets invalidated, resulting in skipping over
-// some of the primes
-
-// Need a way to make sure no threads access same resource at the same time,
-// so maybe in some way I can use atomic counter here. Maybe somehow have
-// each thread use GetAndIncrement() to get a newly available prime for next
-// composite numbers 
-
-void markSome(vector<bool> &n, int i, int threadnum)
+void markSome(vector<char> &n, int i, int threadnum)
 {
     for (int j = i*i + i*threadnum; j <= NUM_VALUE; j+=i*8)
     {
-        n[j] = false;
+        n[j] = 0;
     }
 }
 
@@ -30,18 +20,18 @@ void main(void)
 {    
     auto start = high_resolution_clock::now();
     int count = 0;
-    vector<bool> numbers;
+    vector<char> numbers;
 
     for (int i = 0; i < NUM_VALUE; i++)
     {
-        numbers.push_back(true);
+        numbers.push_back(1);
     }
 
-    numbers[0] = numbers[1] = false;
+    numbers[0] = numbers[1] = 0;
 
     for (int i = 2; i*i <= NUM_VALUE; i++)
     {
-        if (numbers[i] == true)
+        if (numbers[i] == 1)
         {
             thread t1(markSome, ref(numbers), i, 0);
             thread t2(markSome, ref(numbers), i, 1);
@@ -65,7 +55,7 @@ void main(void)
 
     for (int i = 0; i < NUM_VALUE; i++)
     {  
-        if (numbers[i] == true)
+        if (numbers[i] == 1)
         {
             count++;
             // cout << " " << i;
