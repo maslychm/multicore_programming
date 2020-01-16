@@ -38,6 +38,7 @@ void main(void)
     int count = 0;
     long long int sum = 0;
     thread threads[THREADCOUNT];
+    int last10[10];
 
     for (int i = 0; i < NUM_VALUE; i++)
     {
@@ -68,27 +69,16 @@ void main(void)
         if (numbers[i] == 1)
         {
             count++;
+            sum+=i;
         }
     }
 
-    vector<int> last10;
-    for (int i = NUM_VALUE; i >= 0; i--)
+    for (int i = NUM_VALUE, c = 0; i >= 0, c < 10; i--)
     {
         if (numbers[i] == 1)
         {
-            last10.push_back(i);
-            if (last10.size() > 10)
-            {
-                break;
-            }
-        }
-    }
-
-    for (int i = 0; i < NUM_VALUE; i++)
-    {
-        if (numbers[i] == 1)
-        {
-            sum += i;
+            last10[c];
+            c++;
         }
     }
 
@@ -99,10 +89,9 @@ void main(void)
     cout << count << endl;
     cout << sum << endl;
 
-    while (!last10.empty())
+    for(int i = 0; i < 10; i++)
     {
-        cout << last10.back() << ' ';
-        last10.pop_back();
+        cout << last10[i] << ' ';
     }
 
     cout << endl;
