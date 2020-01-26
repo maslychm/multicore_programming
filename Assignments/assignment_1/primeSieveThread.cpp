@@ -14,7 +14,6 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include <vector>
 
 using namespace std;
 using namespace std::chrono;
@@ -26,28 +25,29 @@ bool numbers[NUM_VALUE];
 // Give each thread a specific offset (threadnum) so no overlap
 void markSome(bool (&n)[NUM_VALUE], int i, int threadnum)
 {
-    for (int j = i*i + i*threadnum; j <= NUM_VALUE; j+=i*8)
+    for (int j = i*i + i*threadnum; j <= NUM_VALUE; j += i*THREADCOUNT)
     {
         n[j] = 0;
     }
 }
 
 void main(void)
-{    
-    auto start = high_resolution_clock::now();
+{
     int count = 0;
-    long long int sum = 0;
-    thread threads[THREADCOUNT];
     int last10[10];
+    long long int sum = 0;
+    thread threads[THREADCOUNT + 1];
 
     for (int i = 0; i < NUM_VALUE; i++)
     {
         numbers[i] = 1;
     }
-
     numbers[0] = numbers[1] = 0;
 
-    for (int i = 2; i*i <= NUM_VALUE; i++)
+    // Start counting time
+    auto start = high_resolution_clock::now();
+
+    for (int i = 2; i*i < NUM_VALUE; i++)
     {
         // Split the work approximately evenly among threads
         if (numbers[i] == 1)
@@ -64,6 +64,10 @@ void main(void)
         }
     }
 
+    // Finish counting time
+    auto stop = high_resolution_clock::now();
+
+    // Count and sum primes in range
     for (int i = 0; i < NUM_VALUE; i++)
     {  
         if (numbers[i] == 1)
@@ -73,16 +77,16 @@ void main(void)
         }
     }
 
-    for (int i = NUM_VALUE, c = 0; i >= 0, c < 10; i--)
+    // Save last 10 primes
+    for (int i = NUM_VALUE - 1, c = 9; i >= 0 && c >= 0; i--)
     {
         if (numbers[i] == 1)
         {
-            last10[c];
-            c++;
+            last10[c] = i;
+            c--;
         }
     }
 
-    auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
 
     cout << "Time taken " << (double) duration.count() / 1000000 << " seconds" << endl;
