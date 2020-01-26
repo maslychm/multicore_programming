@@ -24,7 +24,7 @@ using namespace std::chrono;
 bool numbers[NUM_VALUE];
 
 // Give each thread a specific offset (threadnum) so no overlap
-void markSome(bool * n, int i, int threadnum)
+void markSome(bool (&n)[NUM_VALUE], int i, int threadnum)
 {
     for (int j = i*i + i*threadnum; j <= NUM_VALUE; j+=i*8)
     {
