@@ -54,9 +54,9 @@ public:
     void eat()
     {
         // Lock the resource as left to right for all threads presents a deadlock
-        cout << "[" << name << "]" << " is now eating" << endl;
         left.mutex.lock();
         right.mutex.lock();
+        cout << "[" << name << "]" << " is now eating" << endl;
 
         // Unlock resources after random sleep time
         this_thread::sleep_for(chrono::milliseconds(200 * ((rand() % 5) + 1)));
