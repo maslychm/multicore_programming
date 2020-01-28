@@ -11,7 +11,7 @@
 // Expected num: 5761455
 // Expected sum: 279209790387276
 
-#include <iostream>
+#include <fstream>
 #include <chrono>
 #include <thread>
 
@@ -37,6 +37,7 @@ void main(void)
     int last10[10];
     long long int sum = 0;
     thread threads[THREADCOUNT + 1];
+    ofstream myfile;
 
     for (int i = 0; i < NUM_VALUE; i++)
     {
@@ -89,14 +90,16 @@ void main(void)
 
     auto duration = duration_cast<microseconds>(stop - start);
 
-    cout << "Time taken " << (double) duration.count() / 1000000 << " seconds" << endl;
-    cout << count << endl;
-    cout << sum << endl;
+    myfile.open("primes.txt");
+
+    myfile << "Time taken " << (double) duration.count() / 1000000 << " seconds" << endl;
+    myfile << "Primes found: " << count << endl;
+    myfile << "Sum of primes: " << sum << endl;
 
     for(int i = 0; i < 10; i++)
     {
-        cout << last10[i] << ' ';
+        myfile << last10[i] << ' ';
     }
 
-    cout << endl;
+    myfile << endl;
 }
