@@ -14,43 +14,74 @@ struct chopstick
 
 atomic<bool> keepRunning = true;
 
-void philosopherThread(chopstick &l, chopstick &r, int pID)
+class Philosopher
 {
-    cout << "STARTED " << pID << " thread" << endl;
+private:
+    string const name;
+    chopstick &left;
+    chopstick &right;
+    thread t;
 
-    while (keepRunning)
+public:
+    Philosopher(string n, chopstick &l, chopstick &r)
+        : name(n), left(l), right(r), t(&Philosopher::Start, this)
+    {}
+
+    void End()
     {
-        // Sleep for random time before getting hungry
-        this_thread::sleep_for(chrono::milliseconds(1000 * ((rand() % 5) + 1)));
-        cout << "[" << pID << "]" << " is now hungry" << endl;
-
-        // Lock the resource as left to right for all threads presents a deadlock
-        l.mutex.lock();
-        r.mutex.lock();
-
-        cout << "[" << pID << "]" << " is now eating" << endl;
-
-        // Unlock resources after random sleep
-        this_thread::sleep_for(chrono::milliseconds(1000 * ((rand() % 5) + 1)));
-        l.mutex.unlock();
-        r.mutex.unlock();
-        cout << "[" << pID << "]" << " is now thinking" << endl;
+        t.join();
     }
-}
+
+    void Start() 
+    {
+        cout << name << " Thread ID: " << this_thread::get_id() << endl;
+        
+        while (keepRunning)
+        {
+            getHungry();
+            think();
+        }
+    }
+
+    void getHungry()
+    {
+        this_thread::sleep_for(chrono::milliseconds(200 * ((rand() % 5) + 1)));
+        cout << "[" << name << "]" << " is now hungry" << endl;
+
+        eat();
+    }
+
+    void eat()
+    {
+        // Lock the resource as left to right for all threads presents a deadlock
+        cout << "[" << name << "]" << " is now eating" << endl;
+        left.mutex.lock();
+        right.mutex.lock();
+
+        // Unlock resources after random sleep time
+        this_thread::sleep_for(chrono::milliseconds(200 * ((rand() % 5) + 1)));
+        left.mutex.unlock();
+        right.mutex.unlock();
+    }
+
+    void think()
+    {
+        cout << "[" << name << "]" << " is now thinking" << endl;
+    }
+};
 
 void main(void)
 {
-    cout << "at least starts..." << endl << endl;
     array<chopstick, 5> chopsticks;
     char c = 'x';
 
-    thread philosophers[] = 
+    Philosopher ps[] = 
     {
-        thread(philosopherThread, ref(chopsticks[0]), ref(chopsticks[1]), 1),
-        thread(philosopherThread, ref(chopsticks[1]), ref(chopsticks[2]), 2),
-        thread(philosopherThread, ref(chopsticks[2]), ref(chopsticks[3]), 3),
-        thread(philosopherThread, ref(chopsticks[3]), ref(chopsticks[4]), 4),
-        thread(philosopherThread, ref(chopsticks[4]), ref(chopsticks[0]), 5),
+        Philosopher("Dijkstra", chopsticks[0], chopsticks[1]),
+        Philosopher("Peterson", chopsticks[1], chopsticks[2]),
+        Philosopher("Zizek", chopsticks[2], chopsticks[3]),
+        Philosopher("Jung", chopsticks[3], chopsticks[4]),
+        Philosopher("Dostoevsky", chopsticks[4], chopsticks[0]),
     };
 
     while (c != 'n') {
@@ -58,11 +89,10 @@ void main(void)
         keepRunning = false;
     }
 
-    cout << endl;
     for (int i = 0; i < 5; i++)
     {
-        philosophers[i].join();
-        cout << "ENDED thread " << i << endl;
+        ps[i].End();
     }
 
+    cout << "Ended threads Correctly " << endl;
 }
