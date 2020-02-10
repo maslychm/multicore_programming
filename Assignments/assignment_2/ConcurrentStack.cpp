@@ -23,15 +23,13 @@ public:
     bool push(const T& data) {
         node<T>* new_node = new node<T>(data);
 
-        do 
+        do
         {
-            new_node->next = head.load(std::memory_order_relaxed);
-        } while (!std::atomic_compare_exchange_weak_explicit(
+            new_node->next = head.load();
+        } while (!std::atomic_compare_exchange_weak(
             &head,
             &new_node->next,
-            new_node,
-            std::memory_order_release,
-            std::memory_order_relaxed));
+            new_node));
 
         numOps++;
         return true;
@@ -39,7 +37,7 @@ public:
 
     node<T>* pop()
     {
-        node<T>* old_head = head.load(std::memory_order_acquire);
+        node<T>* old_head = head.load();
         node<T>* new_head;
 
         do 
@@ -50,10 +48,10 @@ public:
                 return nullptr;
             }
             new_head = old_head->next;
-        } while(!head.compare_exchange_weak(
-            old_head,
-            new_head,
-            std::memory_order_acquire));
+        } while (!std::atomic_compare_exchange_weak(
+            &head,
+            &old_head,
+            new_head));
 
         numOps++;
         return old_head;

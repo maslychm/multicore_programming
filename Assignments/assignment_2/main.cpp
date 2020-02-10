@@ -1,12 +1,22 @@
+// Mykola Maslych for CAP4520 Multicore Programming
+// Testing of a Lock-Free LIFO
+
 #include <iostream>
-#include <chrono>
+#include <random>
 #include "ConcurrentStack.cpp"
 
-// Function to be spawned on multiple threads
+// To spawn on multiple threads.
+// Randomly push or pop
 void tFunc(concurrentStack<int> &st, int &target) {
+    auto gen = std::bind(std::uniform_int_distribution<>(0,1),std::default_random_engine());
     
     for (int i = 0; i < target; i++) {
-        st.push(i);
+        bool push_or_pop = gen();
+        
+        if (push_or_pop)
+            st.push(i);
+        else
+            st.pop();
     }
 }
 
@@ -14,10 +24,16 @@ int main()
 {
     std::cout << "Lock Free Stack on 4 threads" << std::endl;
     
-    int targetNumOps = 150000;
-    
     concurrentStack<int> lfStack;
 
+    //Pre-populate stack with 50000 entries
+    for (int i = 0; i < 50000; i++)
+    {
+        lfStack.push(i);
+    }
+
+    int targetNumOps = 150000;
+    // Spawn 4 threads pushing and popping
     std::thread threads[] = {
         std::thread(tFunc, std::ref(lfStack), std::ref(targetNumOps)),
         std::thread(tFunc, std::ref(lfStack), std::ref(targetNumOps)),
@@ -30,18 +46,8 @@ int main()
     threads[2].join();
     threads[3].join();
 
-    for (int i = 0; i < 10000; i++) {
-        lfStack.pop();
-    }
-
-    std::cout << "[";
-    for (int i = 0; i < 10; i++) {
-        std::cout << lfStack.pop()->data << " ";
-    }
-    std::cout << "]" << std::endl;
-
     // Checking target and actual number of operations
-    std::cout << "Target numOps: " << targetNumOps * 4 << std::endl;
+    std::cout << "Target numOps: " << targetNumOps * 4 + 50000 << std::endl;
     std::cout << "Actual numOps: " << lfStack.getNumOps() << std::endl;
     return 0;
 }
