@@ -21,6 +21,14 @@ pop() operation:
     if NO, replace with NEW NODE
     if YES, go back to step
 
+atomics:
+    ptr * head
+    int numOps
+    int size
+
+    operators ++ and -- act as atomics if a variable is defined
+    as an atomic variable
+
 Both Push and Pop operations will only succeed with adding/removing
 an element IF in the time they are doing it, there was no change of
 the head. This guarantees correcness.
@@ -28,5 +36,5 @@ the head. This guarantees correcness.
 ```````````````````````````````````````````````````````````````````
 Compile on Windows using Microsoft Visual Studio's compiler
 
-: cl main.cpp
-: main
+: cl ConcurrentStack.cpp
+: ConcurrentStack
