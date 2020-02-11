@@ -38,8 +38,8 @@ public:
     node<T>* pop()
     {
         node<T>* old_head = head.load();
-        node<T>* new_head;
-
+        
+        node<T>* new_head = nullptr;
         do 
         {
             if (old_head == nullptr)
