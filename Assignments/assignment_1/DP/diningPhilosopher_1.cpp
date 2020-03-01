@@ -9,10 +9,8 @@ using namespace std;
 
 struct chopstick
 {
-    mutex mutex;
+    std::mutex mutex;
 };
-
-atomic<bool> keepRunning = true;
 
 class Philosopher
 {
@@ -21,10 +19,11 @@ private:
     chopstick &left;
     chopstick &right;
     thread t;
+    atomic_bool &kR;
 
 public:
-    Philosopher(string n, chopstick &l, chopstick &r)
-        : name(n), left(l), right(r), t(&Philosopher::Start, this)
+    Philosopher(string n, chopstick &l, chopstick &r, atomic_bool& ab)
+        : name(n), left(l), right(r), kR(ab), t(&Philosopher::Start, this)
     {}
 
     void End()
@@ -36,7 +35,7 @@ public:
     {
         cout << name << " Thread ID: " << this_thread::get_id() << endl;
         
-        while (keepRunning)
+        while (kR.load())
         {
             getHungry();
             think();
@@ -70,18 +69,20 @@ public:
     }
 };
 
-void main(void)
+int main(void)
 {
+    atomic<bool> keepRunning;
+    keepRunning.store(true);
     array<chopstick, 5> chopsticks;
     char c = 'x';
 
     Philosopher ps[] = 
     {
-        Philosopher("Dijkstra", chopsticks[0], chopsticks[1]),
-        Philosopher("Peterson", chopsticks[1], chopsticks[2]),
-        Philosopher("Zizek", chopsticks[2], chopsticks[3]),
-        Philosopher("Jung", chopsticks[3], chopsticks[4]),
-        Philosopher("Dostoevsky", chopsticks[4], chopsticks[0]),
+        Philosopher("Dijkstra", chopsticks[0], chopsticks[1],std::ref(keepRunning)),
+        Philosopher("Peterson", chopsticks[1], chopsticks[2],std::ref(keepRunning)),
+        Philosopher("Zizek", chopsticks[2], chopsticks[3],std::ref(keepRunning)),
+        Philosopher("Jung", chopsticks[3], chopsticks[4],std::ref(keepRunning)),
+        Philosopher("Dostoevsky", chopsticks[4], chopsticks[0],std::ref(keepRunning)),
     };
 
     while (c != 'n') {
