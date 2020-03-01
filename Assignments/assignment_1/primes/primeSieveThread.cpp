@@ -31,7 +31,7 @@ void markSome(bool (&n)[NUM_VALUE], int i, int threadnum)
     }
 }
 
-void main(void)
+int main(void)
 {
     int count = 0;
     int last10[10];

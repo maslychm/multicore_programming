@@ -26,3 +26,10 @@ To run on Windows with Microsoft's Visul Studio compiler installed:
 2) Run: `cl primeSieveThread.cpp`
 3) Run: `primeSieveThread`
 4) Open: "primes.txt"
+
+```
+To run on linux with g++ compiler:
+1) Navigate to directory of the file
+2) Compile: `g++ primeSieveThread.cpp -pthread`
+3) Run: `./a.out`
+4) Open: "primes.txt"

@@ -13,6 +13,7 @@
 #include <thread>
 #include <queue>
 #include <string>
+#include <algorithm>
 
 using namespace std;
 using namespace std::chrono;
@@ -45,7 +46,7 @@ void checkForPrimesByMod(int startVal, int maxVal, int &acm, long long int &sum,
     }
 }
 
-void main(void)
+int main(void)
 {
     auto start = high_resolution_clock::now();
 
@@ -113,4 +114,6 @@ void main(void)
     for (int i = 70; i < 80; i++)
        cout << vInt[i] << " ";
     cout << endl;
+
+    return 0;
 }
